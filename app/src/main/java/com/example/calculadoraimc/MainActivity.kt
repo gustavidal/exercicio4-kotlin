@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,7 +40,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -70,6 +74,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CalculadoraIMCScreen(modifier: Modifier = Modifier) {
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
     var altura by remember {
         mutableStateOf("")
@@ -97,7 +102,15 @@ fun CalculadoraIMCScreen(modifier: Modifier = Modifier) {
 
     Column(
         modifier = modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(Color.White)
+            .focusTarget()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus(force = true)
+                    keyboardController?.hide()
+                })
+            },
     ) {
 //        --- header ---
         Column(
@@ -229,6 +242,7 @@ fun CalculadoraIMCScreen(modifier: Modifier = Modifier) {
                     Button(
                         onClick = {
                             keyboardController?.hide()
+                            focusManager.clearFocus(force = true)
 
                             val alturaInt = altura.toIntOrNull()
                             val pesoDouble = peso.replace(",", ".").toDoubleOrNull()
@@ -264,6 +278,7 @@ fun CalculadoraIMCScreen(modifier: Modifier = Modifier) {
                                 altura = ""
                                 peso = ""
                                 isCardVisible = false
+                                focusManager.clearFocus(force = true)
                             },
                             shape = RoundedCornerShape(32.dp),
                             modifier = Modifier
